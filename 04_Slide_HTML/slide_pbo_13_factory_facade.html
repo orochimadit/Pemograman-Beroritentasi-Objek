@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Slide Perkuliahan PBO Modul 13: Creational & Structural Patterns: Factory & Facade oleh Aditya Pratama.">
+  <title>PBO 13: Creational & Structural Patterns: Factory & Facade - Aditya Pratama</title>
+  <style>
+/* Hallmark - genre: modern-minimal | theme: cobalt */
+    :root {
+      --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      --font-mono: ui-monospace, "SF Mono", Consolas, monospace;
+      --bg-page: #0a0f1d;
+      --card-bg: #131b2e;
+      --card-border: #1f2d4a;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --accent: #818cf8;
+      --badge-inlab: #10b981;
+      --badge-inlab-bg: rgba(16, 185, 129, 0.12);
+      --badge-takehome: #818cf8;
+      --badge-takehome-bg: rgba(129, 140, 248, 0.12);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --code-bg: #060913;
+      --btn-ink: #0a0f1d;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      overflow-x: clip;
+      height: 100vh;
+      background: var(--bg-page);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .slide-viewport {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .slide-card {
+      display: none;
+      width: 100%;
+      max-width: 1060px;
+      height: 82vh;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 0.875rem;
+      padding: 2.75rem;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+    }
+
+    .slide-card.active {
+      display: flex;
+    }
+
+    .tag-label {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.25rem;
+      margin-bottom: 1.25rem;
+      width: fit-content;
+    }
+
+    .tag-primary { background: rgba(56, 189, 248, 0.12); color: var(--primary); border: 1px solid rgba(56, 189, 248, 0.25); }
+    .tag-inlab { background: var(--badge-inlab-bg); color: var(--badge-inlab); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .tag-takehome { background: var(--badge-takehome-bg); color: var(--badge-takehome); border: 1px solid rgba(129, 140, 248, 0.3); }
+
+    h1 {
+      font-size: 2.3rem;
+      line-height: 1.2;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.75rem;
+      overflow-wrap: break-word;
+    }
+
+    h2 {
+      font-size: 1.85rem;
+      line-height: 1.25;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 1.25rem;
+      overflow-wrap: break-word;
+    }
+
+    p {
+      font-size: 1.125rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    ul, ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-muted);
+    }
+
+    li {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+    }
+
+    strong { color: #ffffff; font-weight: 600; }
+    code { font-family: var(--font-mono); font-size: 0.95em; color: var(--primary); }
+
+    .grid-duo {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .box-spec {
+      background: rgba(10, 15, 29, 0.7);
+      border: 1px solid var(--card-border);
+      border-radius: 0.5rem;
+      padding: 1.35rem;
+    }
+
+    .box-code-link {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.25rem;
+    }
+
+    .btn-code {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--primary);
+      color: var(--btn-ink);
+      padding: 0.45rem 1rem;
+      border-radius: 0.375rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    .btn-code:hover {
+      background: var(--primary-hover);
+      color: #ffffff;
+    }
+
+    .box-task-inlab {
+      border-left: 3px solid var(--badge-inlab);
+      background: var(--badge-inlab-bg);
+      padding: 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin-bottom: 1.25rem;
+    }
+
+    .box-task-home {
+      border-left: 3px solid var(--badge-takehome);
+      background: var(--badge-takehome-bg);
+      padding: 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin-bottom: 1.25rem;
+    }
+
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 2.5rem;
+      background: #060913;
+      border-top: 1px solid var(--card-border);
+    }
+
+    .btn-nav {
+      background: var(--card-bg);
+      color: #ffffff;
+      border: 1px solid var(--card-border);
+      padding: 0.5rem 1.25rem;
+      border-radius: 0.375rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-nav:hover {
+      background: var(--primary);
+      color: var(--btn-ink);
+    }
+
+    .btn-nav:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    .meta-track {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn-nav { transition: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="slide-viewport">
+
+    <!-- SLIDE 1: Title -->
+    <section class="slide-card active" aria-labelledby="slide-1-title">
+      <div>
+        <span class="tag-label tag-primary">Modul 13: Pertemuan 13</span>
+        <h1 id="slide-1-title">Creational & Structural Patterns: Factory & Facade</h1>
+        <p style="font-size: 1.25rem; color: var(--primary); margin-top: 1rem;">
+          Pola Desain Klasik GoF untuk Skalabilitas dan Kesederhanaan
+        </p>
+        <p style="max-width: 720px; margin-top: 1.25rem;">
+          Mata kuliah Pemrograman Berorientasi Objek berbasis Python 3.10+ dan metode Vibe Coding terkontrol.
+        </p>
+      </div>
+      <footer style="border-top: 1px solid var(--card-border); padding-top: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <p style="font-size: 0.95rem; margin-bottom: 0.2rem;">Pemateri: <strong>Aditya Pratama</strong></p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Program Studi Sistem Informasi</p>
+        </div>
+        <span class="meta-track">Gunakan tombol Selanjutnya atau Panah Kanan</span>
+      </footer>
+    </section>
+
+    <!-- SLIDE 2: Core Theory 1 -->
+    <section class="slide-card" aria-labelledby="slide-2-title">
+      <div>
+        <span class="tag-label tag-primary">Fondasi Arsitektur</span>
+        <h2 id="slide-2-title">Factory Method Pattern</h2>
+        <div class="grid-duo">
+          <div class="box-spec">
+            <h3 style="color: var(--primary); font-size: 1.15rem; margin-bottom: 0.75rem;">Masalah Tanpa Factory</h3>
+            <ul>
+              <li>Kode klien penuh if-elif untuk instansiasi class.</li><li>Klien harus tahu semua nama class konkret.</li><li>Menambah format baru memaksa edit kode klien (langgar OCP).</li>
+            </ul>
+          </div>
+          <div class="box-spec">
+            <h3 style="color: var(--accent); font-size: 1.15rem; margin-bottom: 0.75rem;">Solusi Factory Method</h3>
+            <ul>
+              <li>Sentralisasi logika instansiasi objek rumit.</li><li>Klien cukup menyebut tipe string yang diinginkan.</li><li>Menerapkan Open/Closed Principle secara penuh.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <p style="font-size: 0.9rem;">Referensi: <em>Python Object-Oriented Programming (4th Edition)</em>.</p>
+    </section>
+
+    <!-- SLIDE 3: Core Theory 2 & Code Link -->
+    <section class="slide-card" aria-labelledby="slide-3-title">
+      <div>
+        <span class="tag-label tag-primary">Implementasi Teknis</span>
+        <h2 id="slide-3-title">Facade Pattern</h2>
+        <div class="grid-duo" style="margin-top: 1.25rem;">
+          <div class="box-spec">
+            <h3 style="color: var(--primary); font-size: 1.15rem; margin-bottom: 0.75rem;">Masalah Subsistem Rumit</h3>
+            <ul>
+              <li>Klien harus berinteraksi dengan 4 class layanan terpisah.</li><li>Urutan pemanggilan method rawan terbalik atau terlupa.</li><li>Kopling klien terhadap subsistem terlalu rumit.</li>
+            </ul>
+          </div>
+          <div class="box-spec">
+            <h3 style="color: var(--accent); font-size: 1.15rem; margin-bottom: 0.75rem;">Solusi Facade</h3>
+            <ul>
+              <li>Menyediakan satu class pembungkus tingkat tinggi.</li><li>Klien cukup memanggil satu method praktis.</li><li>Contoh: facade.proses_yudisium(nim).</li>
+            </ul>
+          </div>
+        </div>
+        <div class="box-code-link">
+          <div>
+            <p style="color: #ffffff; font-weight: 600; font-size: 1rem; margin-bottom: 0.2rem;">Berkas Kode Program (.py)</p>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0;">File: <code>m13_factory_exporter_facade.py</code></p>
+          </div>
+          <a href="../05_Source_Code/05_Abstraction_Interface/m13_factory_exporter_facade.py" target="_blank" class="btn-code">Buka Source Code (.py) ↗</a>
+        </div>
+      </div>
+      <p style="font-size: 0.9rem;">Seluruh implementasi wajib mematuhi standar konvensi PEP 8 dan type annotations PEP 484.</p>
+    </section>
+
+    <!-- SLIDE 4: Vibe Coding Strategy -->
+    <section class="slide-card" aria-labelledby="slide-4-title">
+      <div>
+        <span class="tag-label tag-primary">Metodologi Vibe Coding</span>
+        <h2 id="slide-4-title">Audit Kode AI: Open/Closed Principle</h2>
+        <p>Mengarahkan AI Coding Assistant sebagai Lead System Architect dan mengaudit kelemahan kode.</p>
+        <div class="box-spec" style="margin-top: 1.25rem;">
+          <h3 style="color: #ffffff; font-size: 1.1rem; margin-bottom: 0.75rem;">Siklus Verifikasi Mahasiswa</h3>
+          <ol>
+            <li>Audit class Factory buatan AI: apakah menggunakan registry dictionary?</li><li>Pastikan penambahan class baru tidak perlu mengubah fungsi utama klien.</li><li>Pastikan class Facade membungkus subsistem secara rapi.</li>
+          </ol>
+        </div>
+      </div>
+      <p style="font-size: 0.9rem;">Dokumentasikan seluruh proses instruksi dan koreksi di dalam berkas PROMPT_LOG.md.</p>
+    </section>
+
+    <!-- SLIDE 5: TUGAS IN-LAB -->
+    <section class="slide-card" aria-labelledby="slide-5-title">
+      <div>
+        <span class="tag-label tag-inlab">Praktikum Kelas: In-Lab (35 Menit)</span>
+        <h2 id="slide-5-title">Tugas In-Lab: Factory Ekspor Dokumen Laporan</h2>
+        <div class="box-task-inlab">
+          <p style="color: #ffffff; margin-bottom: 0; font-weight: 500;">
+            Target: Menghasilkan objek PDFExporter atau ExcelExporter via Factory.
+          </p>
+        </div>
+        <ol>
+          <li>15 Menit Koding Manual: Tulis interface DocumentExporter dan 2 turunannya.</li><li>15 Menit di Antigravity: Buat ExporterFactory dengan method get_exporter().</li><li>5 Menit Verifikasi: Jalankan skrip di terminal dengan format ekspor dinamis.</li>
+        </ol>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--badge-inlab);">Dinilai langsung saat sesi praktikum di laboratorium.</p>
+    </section>
+
+    <!-- SLIDE 6: TUGAS TAKE-HOME -->
+    <section class="slide-card" aria-labelledby="slide-6-title">
+      <div>
+        <span class="tag-label tag-takehome">Tugas Mandiri: Take-Home</span>
+        <h2 id="slide-6-title">Tugas Take-Home: Facade Portal Yudisium Mahasiswa</h2>
+        <div class="box-task-home">
+          <p style="color: #ffffff; margin-bottom: 0; font-weight: 500;">
+            Target: Menyederhanakan alur pendaftaran yudisium kampus.
+          </p>
+        </div>
+        <ul>
+          <li><strong>Spesifikasi Kebutuhan</strong>:
+            <ul style="margin-top: 0.35rem; margin-left: 1.25rem;">
+              <li>3 Subsistem: KeuanganService, PerpustakaanService, AkademikService.</li><li>Class PendaftaranYudisiumFacade membungkus ketiga validasi.</li><li>Klien hanya memanggil satu method: daftar_yudisium(nim).</li>
+            </ul>
+          </li>
+          <li><strong>Berkas Pengumpulan</strong>:
+            <ul style="margin-top: 0.35rem;">
+              <li>yudisium_facade.py</li><li>PROMPT_LOG.md</li>
+            </ul>
+          </li>
+          <li><strong>Tenggat Waktu</strong>: H-1 sebelum pertemuan berikutnya melalui portal LMS.</li>
+        </ul>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--badge-takehome);">Kriteria penilaian: kebenaran pilar PBO, kelengkapan PROMPT_LOG.md, dan kebersihan kode.</p>
+    </section>
+
+    <!-- SLIDE 7: Summary & QnA -->
+    <section class="slide-card" aria-labelledby="slide-7-title">
+      <div>
+        <span class="tag-label tag-primary">Kesimpulan</span>
+        <h2 id="slide-7-title">Rangkuman Pertemuan 13</h2>
+        <div class="grid-duo" style="margin-top: 1.5rem;">
+          <div class="box-spec">
+            <h3 style="color: #ffffff; font-size: 1.1rem; margin-bottom: 0.5rem;">Poin Kunci Konseptual</h3>
+            <p style="font-size: 0.95rem;">
+              Factory Method Pattern: Kuasai pemodelan objek dan batasan hak akses agar integritas arsitektur software terjaga.
+            </p>
+          </div>
+          <div class="box-spec">
+            <h3 style="color: #ffffff; font-size: 1.1rem; margin-bottom: 0.5rem;">Poin Kunci Vibe Coding</h3>
+            <p style="font-size: 0.95rem;">
+              Gunakan AI untuk mempercepat penulisan kerangka, tetapi kendalikan logika dan validasi melalui audit kritis mahasiswa.
+            </p>
+          </div>
+        </div>
+        <div style="margin-top: 2rem; border-top: 1px solid var(--card-border); padding-top: 1.25rem;">
+          <p style="color: #ffffff; font-size: 1.2rem; font-weight: 600;">Sesi Diskusi & Tanya Jawab</p>
+          <p style="font-size: 0.95rem;">Silakan ajukan pertanyaan sebelum memulai pengerjaan tugas In-Lab di kelas.</p>
+        </div>
+      </div>
+      <footer style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Pemateri: Aditya Pratama</span>
+        <a href="index.html" style="font-size: 0.85rem; color: var(--primary); text-decoration: none;">← Kembali ke Portal Slide</a>
+      </footer>
+    </section>
+
+  </main>
+
+  <!-- Navigation Controls -->
+  <nav class="nav-bar" aria-label="Navigasi Slide">
+    <button class="btn-nav" id="prevBtn" onclick="prevSlide()" type="button">Sebelumnya</button>
+    <span class="meta-track" id="slideIndicator">Slide 1 dari 7</span>
+    <button class="btn-nav" id="nextBtn" onclick="nextSlide()" type="button">Selanjutnya</button>
+  </nav>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide-card');
+    const indicator = document.getElementById('slideIndicator');
+
+    function updateSlide(targetIndex) {
+      slides.forEach((slide, index) => {
+        slide.classList.toggle('active', index === targetIndex);
+      });
+      indicator.textContent = `Slide ${targetIndex + 1} dari ${slides.length}`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        updateSlide(currentSlide);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide(currentSlide);
+      }
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight' || event.key === ' ') {
+        nextSlide();
+      } else if (event.key === 'ArrowLeft') {
+        prevSlide();
+      }
+    });
+  </script>
+</body>
+</html>
